@@ -3,10 +3,10 @@ import yfinance as yf
 import pandas as pd
 import pandas_ta as ta
 
-# Configuração da Página
-st.set_page_config(page_title="Scanner Profissional - Swing Trade B3", layout="wide")
+# --- CONFIGURAÇÃO DA PÁGINA ---
+st.set_page_config(page_title="SETUP PRIVADO - B3", layout="wide")
 
-# --- SISTEMA DE SEGURANÇA ---
+# --- SISTEMA DE ACESSO ---
 SENHA_CORRETA = "mestre10"
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
@@ -19,125 +19,111 @@ if not st.session_state.autenticado:
             st.session_state.autenticado = True
             st.rerun()
         else:
-            st.error("Chave incorreta. Fale com o administrador.")
+            st.error("Chave incorreta.")
     st.stop()
 
-# --- LISTA DE ATIVOS (EXEMPLO COM OS PRINCIPAIS, EXPANSÍVEL) ---
-# Aqui você pode listar todos os 178. Abaixo estão os principais para teste.
-ativos_b3 = [
-    "RRRP3.SA", "ALOS3.SA", "ALPA4.SA", "ABEV3.SA", "ARZZ3.SA", "ASAI3.SA", "AZUL4.SA", "B3SA3.SA", 
-    "BBAS3.SA", "BBDC3.SA", "BBDC4.SA", "BBSE3.SA", "BEEF3.SA", "BPAC11.SA", "BRAP4.SA", "BRFS3.SA", 
-    "BRKM5.SA", "CCRO3.SA", "CIEL3.SA", "CMIG4.SA", "CMIN3.SA", "COGN3.SA", "CPFE3.SA", "CPLE6.SA", 
-    "CRFB3.SA", "CSAN3.SA", "CSNA3.SA", "CVCB3.SA", "CYRE3.SA", "DXCO3.SA", "ELET3.SA", "ELET6.SA", 
-    "EMBR3.SA", "ENGI11.SA", "ENEV3.SA", "EGIE3.SA", "EQTL3.SA", "EZTC3.SA", "FLRY3.SA", "GGBR4.SA", 
-    "GOAU4.SA", "HAPV3.SA", "HYPE3.SA", "ITSA4.SA", "ITUB4.SA", "JBSS3.SA", "KLBN11.SA", "LREN3.SA", 
-    "LWSA3.SA", "MGLU3.SA", "MRFG3.SA", "MRVE3.SA", "MULT3.SA", "NTCO3.SA", "PETR3.SA", "PETR4.SA", 
-    "RECV3.SA", "RAIL3.SA", "RDOR3.SA", "RADL3.SA", "RAIZ4.SA", "RENT3.SA", "SANB11.SA", "SBSP3.SA", 
-    "SLCE3.SA", "SMTO3.SA", "SOMA3.SA", "SUZB3.SA", "TAEE11.SA", "TOTS3.SA", "TRPL4.SA", "UGPA3.SA", 
-    "USIM5.SA", "VALE3.SA", "VAMO3.SA", "VBBR3.SA", "VIVA3.SA", "VIVT3.SA", "WEGE3.SA", "YDUQ3.SA",
-    "BOVA11.SA", "IVVB11.SA", "SMALL11.SA", "AAPL34.SA", "AMZO34.SA", "GOGL34.SA", "MELI34.SA"
-    # Adicione os demais códigos seguidos de .SA para completar os 178
-]
+# --- LISTA FIXA DE ATIVOS (178) ---
+ativos_scan = sorted(set([
+    "RRRP3.SA","ALOS3.SA","ALPA4.SA","ABEV3.SA","ARZZ3.SA","ASAI3.SA","AZUL4.SA","B3SA3.SA","BBAS3.SA","BBDC3.SA",
+    "BBDC4.SA","BBSE3.SA","BEEF3.SA","BPAC11.SA","BRAP4.SA","BRFS3.SA","BRKM5.SA","CCRO3.SA","CMIG4.SA","CMIN3.SA",
+    "COGN3.SA","CPFE3.SA","CPLE6.SA","CRFB3.SA","CSAN3.SA","CSNA3.SA","CYRE3.SA","DXCO3.SA","EGIE3.SA","ELET3.SA",
+    "ELET6.SA","EMBR3.SA","ENEV3.SA","ENGI11.SA","EQTL3.SA","EZTC3.SA","FLRY3.SA","GGBR4.SA","GOAU4.SA","GOLL4.SA",
+    "HAPV3.SA","HYPE3.SA","ITSA4.SA","ITUB4.SA","JBSS3.SA","KLBN11.SA","LREN3.SA","LWSA3.SA","MGLU3.SA","MRFG3.SA",
+    "MRVE3.SA","MULT3.SA","NTCO3.SA","PETR3.SA","PETR4.SA","PRIO3.SA","RADL3.SA","RAIL3.SA","RAIZ4.SA","RENT3.SA",
+    "RECV3.SA","SANB11.SA","SBSP3.SA","SLCE3.SA","SMTO3.SA","SUZB3.SA","TAEE11.SA","TIMS3.SA","TOTS3.SA","TRPL4.SA",
+    "UGPA3.SA","USIM5.SA","VALE3.SA","VIVT3.SA","VIVA3.SA","WEGE3.SA","YDUQ3.SA","AURE3.SA","BHIA3.SA","CASH3.SA",
+    "CVCB3.SA","DIRR3.SA","ENAT3.SA","GMAT3.SA","IFCM3.SA","INTB3.SA","JHSF3.SA","KEPL3.SA","MOVI3.SA","ORVR3.SA",
+    "PETZ3.SA","PLAS3.SA","POMO4.SA","POSI3.SA","RANI3.SA","RAPT4.SA","STBP3.SA","TEND3.SA","TUPY3.SA",
+    "BRSR6.SA","CXSE3.SA","AAPL34.SA","AMZO34.SA","GOGL34.SA","MSFT34.SA","TSLA34.SA","META34.SA","NFLX34.SA",
+    "NVDC34.SA","MELI34.SA","BABA34.SA","DISB34.SA","PYPL34.SA","JNJB34.SA","PGCO34.SA","KOCH34.SA","VISA34.SA",
+    "WMTB34.SA","NIKE34.SA","ADBE34.SA","AVGO34.SA","CSCO34.SA","COST34.SA","CVSH34.SA","GECO34.SA","GSGI34.SA",
+    "HDCO34.SA","INTC34.SA","JPMC34.SA","MAEL34.SA","MCDP34.SA","MDLZ34.SA","MRCK34.SA","ORCL34.SA","PEP334.SA",
+    "PFIZ34.SA","PMIC34.SA","QCOM34.SA","SBUX34.SA","TGTB34.SA","TMOS34.SA","TXN34.SA","UNHH34.SA","UPSB34.SA",
+    "VZUA34.SA","ABTT34.SA","AMGN34.SA","AXPB34.SA","BAOO34.SA","CATP34.SA","HONB34.SA","BOVA11.SA","IVVB11.SA",
+    "SMAL11.SA","HASH11.SA","GOLD11.SA","GARE11.SA","HGLG11.SA","XPLG11.SA","VILG11.SA","BRCO11.SA","BTLG11.SA",
+    "XPML11.SA","VISC11.SA","HSML11.SA","MALL11.SA","KNRI11.SA","JSRE11.SA","PVBI11.SA","HGRE11.SA","MXRF11.SA",
+    "KNCR11.SA","KNIP11.SA","CPTS11.SA","IRDM11.SA","DIVO11.SA","NDIV11.SA","SPUB11.SA"
+]))
 
-# --- FUNÇÕES TÉCNICAS ---
-def calcular_indicadores(df):
-    # Estocástico (14, 3, 3)
-    stoch = ta.stoch(df['High'], df['Low'], df['Close'], k=14, d=3, smooth_k=3)
-    # DMI / ADX (14)
-    adx = ta.adx(df['High'], df['Low'], df['Close'], length=14)
-    return pd.concat([df, stoch, adx], axis=1)
+# --- LÓGICA TÉCNICA ---
+def analisar_ativo(ticker):
+    # Gráfico Semanal (Tendência)
+    df_w = yf.download(ticker, period="1y", interval="1wk", progress=False)
+    # Gráfico Diário (Gatilho)
+    df_d = yf.download(ticker, period="100d", interval="1d", progress=False)
 
-def analisar_candle(df):
-    ultimo = df.iloc[-1]
-    anterior = df.iloc[-2]
-    corpo = abs(ultimo['Close'] - ultimo['Open'])
-    range_total = ultimo['High'] - ultimo['Low']
-    sombra_sup = ultimo['High'] - max(ultimo['Close'], ultimo['Open'])
-    sombra_inf = min(ultimo['Close'], ultimo['Open']) - ultimo['Low']
+    if df_w.empty or df_d.empty:
+        return None
+
+    # Indicadores Semanais
+    stoch_w = ta.stoch(df_w['High'], df_w['Low'], df_w['Close'], k=14, d=3, smooth_k=3)
+    dmi_w = ta.adx(df_w['High'], df_w['Low'], df_w['Close'], length=14)
     
-    # Critérios do Manual: Fechamento > Anterior, Fechado perto da máxima, Corpo > Sombras
-    f_alta = ultimo['Close'] > anterior['Close']
-    p_maxima = ultimo['Close'] >= (ultimo['High'] - (range_total * 0.25))
-    c_dominante = corpo > (sombra_sup + sombra_inf)
+    # Filtro Semanal (Semana Anterior Encerrada)
+    semanal_ok = (stoch_w['STOCHk_14_3_3'].iloc[-2] >= stoch_w['STOCHk_14_3_3'].iloc[-3]) and \
+                 (dmi_w['DMP_14'].iloc[-2] > dmi_w['DMN_14'].iloc[-2])
+
+    # Indicadores Diários
+    stoch_d = ta.stoch(df_d['High'], df_d['Low'], df_d['Close'], k=14, d=3, smooth_k=3)
+    dmi_d = ta.adx(df_d['High'], df_d['Low'], df_d['Close'], length=14)
     
-    # Filtro de Neutro (Range entre 40% e 60% é proibido)
-    posicao_relativa = (ultimo['Close'] - ultimo['Low']) / range_total if range_total != 0 else 0.5
-    nao_neutro = not (0.4 <= posicao_relativa <= 0.6)
+    # Gatilho Diário
+    diario_ok = (stoch_d['STOCHk_14_3_3'].iloc[-1] > stoch_d['STOCHd_14_3_3'].iloc[-1]) and \
+                (dmi_d['DMP_14'].iloc[-1] > dmi_d['DMN_14'].iloc[-1])
+
+    # Anatomia do Candle (Item 6)
+    u = df_d.iloc[-1]
+    a = df_d.iloc[-2]
+    corpo = abs(u['Close'] - u['Open'])
+    range_t = u['High'] - u['Low']
+    posicao_f = (u['Close'] - u['Low']) / range_t if range_t != 0 else 0.5
+    pavios = (u['High'] - max(u['Close'], u['Open'])) + (min(u['Close'], u['Open']) - u['Low'])
     
-    return f_alta and p_maxima and c_dominante and nao_neutro
+    candle_ok = (u['Close'] > a['Close']) and (u['Close'] >= (u['High'] - (range_t * 0.2))) and \
+                (corpo > pavios) and not (0.4 <= posicao_f <= 0.6)
+
+    return {
+        "semanal": semanal_ok,
+        "diario": diario_ok,
+        "candle": candle_ok,
+        "preco": u['Close'],
+        "historico": df_d['Close']
+    }
 
 # --- INTERFACE ---
-st.title("🎯 Scanner Swing Trade - Estratégia Buy Side")
-st.markdown("---")
+st.title("🎯 SCANNER TENDÊNCIA B3")
+st.write("Análise de Final de Semana - Buy Side Only")
 
-col_setup, col_res = st.columns([1, 3])
+selecionado = st.selectbox("Selecione o ativo da lista de 178:", ativos_scan)
 
-with col_setup:
-    st.write("### ⚙️ Configuração")
-    ativo = st.selectbox("Escolha o ativo para análise:", sorted(ativos_b3))
-    botao = st.button("VERIFICAR COMPRA")
+if st.button("VERIFICAR ESTRUTURA"):
+    with st.spinner('Processando dados...'):
+        res = analisar_ativo(selecionado)
+        
+        if res:
+            st.divider()
+            # Ranking de Probabilidade
+            if res['semanal'] and res['diario'] and res['candle']:
+                st.success("💎 RANKING OURO: Alta Probabilidade de Gain")
+            elif res['semanal']:
+                st.warning("🥈 RANKING PRATA: Tendência Semanal OK (Aguardar Gatilho)")
+            else:
+                st.error("🚫 RANKING BRONZE: Fora da Tendência ou Candle Neutro")
 
-if botao:
-    with st.spinner('Validando Filtros Semanais e Diários...'):
-        # Coleta Dados
-        df_d = yf.download(ativo, period="100d", interval="1d")
-        df_w = yf.download(ativo, period="1y", interval="1wk")
-
-        if not df_d.empty and len(df_w) > 3:
-            df_d = calcular_indicadores(df_d)
-            df_w = calcular_indicadores(df_w)
-
-            # 1. FILTRO SEMANAL (Semana anterior fechada)
-            # Regra: Estocástico subindo ou lateral (não caindo) + D+ > D-
-            stoch_w_agora = df_w['STOCHk_14_3_3'].iloc[-2]
-            stoch_w_antes = df_w['STOCHk_14_3_3'].iloc[-3]
-            dplus_w = df_w['DMP_14'].iloc[-2]
-            dminus_w = df_w['DMN_14'].iloc[-2]
+            # Gestão de Capital (Item 11)
+            col1, col2, col3 = st.columns(3)
+            p = res['preco']
             
-            semanal_ok = (stoch_w_agora >= stoch_w_antes) and (dplus_w > dminus_w)
+            # Define Stop e Alvo por tipo de ativo
+            if "34" in selecionado: stop_p, gain_p, cap = 0.04, 0.06, 2500
+            elif "11" in selecionado: stop_p, gain_p, cap = 0.03, 0.045, 3300
+            else: stop_p, gain_p, cap = 0.05, 0.075, 2000
 
-            # 2. FILTRO DIÁRIO (Candle do Sinal)
-            # Regra: Estocástico K > D + D+ > D-
-            stoch_d_k = df_d['STOCHk_14_3_3'].iloc[-1]
-            stoch_d_d = df_d['STOCHd_14_3_3'].iloc[-1]
-            dplus_d = df_d['DMP_14'].iloc[-1]
-            dminus_d = df_d['DMN_14'].iloc[-1]
+            col1.metric("Entrada", f"R$ {p:.2f}")
+            col2.metric("Stop Loss", f"R$ {p*(1-stop_p):.2f}")
+            col3.metric("Alvo (Gain)", f"R$ {p*(1+gain_p):.2f}")
             
-            diario_ok = (stoch_d_k > stoch_d_d) and (dplus_d > dminus_d)
-            candle_valido = analisar_candle(df_d)
-
-            # --- RESULTADOS ---
-            with col_res:
-                st.write(f"## Análise de {ativo}")
-                
-                # Classificação de Probabilidade
-                if semanal_ok and diario_ok and candle_valido:
-                    st.success("💎 **CLASSIFICAÇÃO: OURO** (Alta Probabilidade Estatística)")
-                    st.write("✅ Tendência Semanal Alinhada | ✅ Momentum Diário Positivo | ✅ Candle de Força")
-                elif semanal_ok:
-                    st.warning("🥈 **CLASSIFICAÇÃO: PRATA** (Tendência OK, mas sem gatilho de entrada)")
-                    st.write("✅ Tendência Semanal Alinhada | ❌ Gatilho Diário ou Candle não confirmou.")
-                else:
-                    st.error("🚫 **CLASSIFICAÇÃO: BRONZE** (Risco Alto - Fora da Tendência Semanal)")
-                    st.write("❌ Sem vantagem estatística no gráfico semanal. Estocástico semanal caindo ou D- dominante.")
-
-                # Gestão de Risco Estrita
-                st.divider()
-                st.write("### 📈 Parâmetros da Operação")
-                
-                preco = df_d['Close'].iloc[-1]
-                # Determina tipo de ativo
-                if "34" in ativo: # BDR
-                    stop_p, gain_p, cap = 0.04, 0.06, 2500
-                elif "11" in ativo: # ETF
-                    stop_p, gain_p, cap = 0.03, 0.045, 3300
-                else: # Ação
-                    stop_p, gain_p, cap = 0.05, 0.075, 2000
-
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Entrada sugerida", f"R$ {preco:.2f}")
-                c2.metric("Stop Loss (Fixo)", f"R$ {preco*(1-stop_p):.2f}")
-                c3.metric("Alvo (Gain)", f"R$ {preco*(1+gain_p):.2f}")
-
-                st.info(f"💰 **GESTÃO DE CAPITAL:** Alocação máxima permitida para este trade: **R$ {cap:.2f}**")
-                st.line_chart(df_d['Close'])
+            st.info(f"💰 Gestão: Alocação sugerida de R$ {cap:.2f} (Risco 1% do Capital)")
+            st.line_chart(res['historico'])
+        else:
+            st.error("Erro ao baixar dados do Yahoo Finance. Tente novamente.")
